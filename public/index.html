@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>orbit ai</title>
+<script src="https://js.puter.com/v2/"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #e8ecf5;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 20% 30%, rgba(80, 50, 90, 0.5), transparent 60%),
+      radial-gradient(ellipse at 80% 70%, rgba(50, 80, 95, 0.5), transparent 60%),
+      #0a0612;
+  }
+
+  #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .star { position: absolute; background: #fff; border-radius: 50%; }
+
+  @keyframes rise {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-120vh); }
+  }
+
+  header, #chat, form { position: relative; z-index: 1; }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(180, 200, 255, 0.15);
+    margin-bottom: 14px;
+  }
+
+  h1 { font-size: 20px; font-weight: 500; }
+  h1 span { color: #a9d8ff; font-style: italic; }
+
+  .model-tag {
+    font-size: 12px;
+    color: #a9d8ff;
+    border: 1px solid rgba(169, 216, 255, 0.25);
+    padding: 5px 12px;
+    border-radius: 999px;
+    opacity: 0.8;
+  }
+
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 8px 4px;
+  }
+
+  #chat::-webkit-scrollbar { width: 5px; }
+  #chat::-webkit-scrollbar-thumb { background: rgba(180, 200, 255, 0.2); border-radius: 999px; }
+
+  .welcome { margin: auto; text-align: center; }
+
+  .welcome-pill {
+    display: inline-block;
+    padding: 14px 32px;
+    background: rgba(20, 14, 32, 0.6);
+    border: 1px solid rgba(180, 200, 255, 0.15);
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
+    font-size: 22px;
+  }
+
+  .welcome-pill span { color: #a9d8ff; font-style: italic; }
+
+  .msg {
+    max-width: 80%;
+    padding: 10px 16px;
+    border-radius: 18px;
+    line-height: 1.5;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .user {
+    align-self: flex-end;
+    background: rgba(169, 216, 255, 0.15);
+    border: 1px solid rgba(169, 216, 255, 0.25);
+  }
+
+  .ai {
+    align-self: flex-start;
+    background: rgba(26, 26, 46, 0.7);
+    border: 1px solid rgba(180, 200, 255, 0.12);
+    backdrop-filter: blur(8px);
+  }
+
+  .ai.error { color: #ff9b9b; }
+
+  form {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 6px 6px 6px 16px;
+    background: rgba(20, 14, 32, 0.7);
+    border: 1px solid rgba(180, 200, 255, 0.2);
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
+  }
+
+  input[type="text"] {
+    flex: 1;
+    background: transparent;
+    color: #e8ecf5;
+    border: none;
+    padding: 8px 0;
+    font-size: 14px;
+    outline: none;
+  }
+
+  input[type="text"]::placeholder { color: #6b6582; }
+
+  button {
+    background: #a9d8ff;
+    color: #0f0f1a;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+  <div id="stars"></div>
+
+  <header>
+    <h1>orbit <span>ai</span></h1>
+    <div class="model-tag">Powered by Anthropic</div>
+  </header>
+
+  <div id="chat">
+    <div class="welcome" id="welcome">
+      <div class="welcome-pill">ask <span>anything</span></div>
+    </div>
+  </div>
+
+  <form id="form">
+    <input type="text" id="input" placeholder="Type a message..." autocomplete="off" />
+    <button type="submit" id="send">Send</button>
+  </form>
+
+<script>
+  (function () {
+    const box = document.getElementById('stars');
+    for (let i = 0; i < 50; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 2 + 1;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.left = Math.random() * 100 + '%';
+      s.style.top = Math.random() * 110 + '%';
+      s.style.opacity = (Math.random() * 0.6 + 0.3).toFixed(2);
+      const dur = (Math.random() * 20 + 15).toFixed(1);
+      const delay = (Math.random() * -30).toFixed(1);
+      s.style.animation = `rise ${dur}s ${delay}s linear infinite`;
+      box.appendChild(s);
+    }
+  })();
+
+  const chat = document.getElementById('chat');
+  const welcome = document.getElementById('welcome');
+  const form = document.getElementById('form');
+  const input = document.getElementById('input');
+  const send = document.getElementById('send');
+  const history = [];
+
+  function addMsg(text, who) {
+    if (welcome && welcome.parentNode) welcome.remove();
+    const d = document.createElement('div');
+    d.className = 'msg ' + who;
+    d.textContent = text;
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+    return d;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMsg(text, 'user');
+    history.push({ role: 'user', content: text });
+    input.value = '';
+    send.disabled = true;
+
+    const thinking = addMsg('...', 'ai');
+
+    try {
+      const response = await puter.ai.chat(history, { model: 'claude-sonnet-4-6' });
+      const reply = response?.message?.content?.[0]?.text
+                 || response?.message?.content
+                 || '(no response)';
+      thinking.textContent = reply;
+      history.push({ role: 'assistant', content: reply });
+    } catch (err) {
+      thinking.textContent = 'Error: ' + (err.message || err);
+      thinking.classList.add('error');
+      history.pop();
+    } finally {
+      send.disabled = false;
+      input.focus();
+    }
+  });
+</script>
+</body>
+</html>
