@@ -1,14 +1,14 @@
 export default async function handler(req, res) {
   const { messages } = req.body;
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_KEY,
-      'anthropic-version': '2023-06-01'
+      'Authorization': `Bearer ${process.env.OPENROUTER_KEY}`
     },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, messages })
+    body: JSON.stringify({ model: 'anthropic/claude-sonnet-4-6', messages })
   });
   const data = await response.json();
-  res.json(data);
+  const reply = data.choices?.[0]?.message?.content || '(no response)';
+  res.json({ reply });
 }
